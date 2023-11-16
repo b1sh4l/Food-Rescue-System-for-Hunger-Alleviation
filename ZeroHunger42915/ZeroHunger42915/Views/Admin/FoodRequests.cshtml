@@ -1,0 +1,81 @@
+﻿@model IEnumerable<ZeroHunger42915.Models.FoodCollectionRequest>
+
+
+@{
+    ViewBag.Title = "FoodRequests";
+}
+
+<h2>Employees</h2>
+<div style="text-align: center;"> 
+    @Html.Partial("_Employees", ViewBag.Employees as IEnumerable<ZeroHunger42915.Models.Employee>)
+</div>
+
+<br />
+<br />
+
+<h2>Add Employee</h2>
+<div style="text-align: center;">
+    @Html.Partial("_AddEmployee", new ZeroHunger42915.DTO.EmployeeDTO())
+</div>
+
+<br />
+<br />
+
+<h2>FoodRequests</h2>
+
+<table align="center" style="width: 100%;">
+    <tr>
+        <th>Request ID</th>
+        <th>Restaurant Name</th>
+        <th>Max Preservation Time</th>
+        <th>Assigned Employee</th>
+        <th>Completed</th>
+        <th>Action</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.RequestID</td>
+            <td>@item.RestaurantName</td>
+            <td>@item.MaxPreservationTime</td>
+            <td>
+                @if (item.AssignedTasks != null && item.AssignedTasks.Any())
+                {
+                    <ul>
+                        @foreach (var task in item.AssignedTasks)
+                        {
+                            <li>@task.Employee.FullName</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <span>Not Assigned Yet</span>
+                }
+            </td>
+            <td><span>@(item.IsCompleted.Value ? "Yes" : "No")</span> </td>
+            <td>
+                @if (!item.IsAssigned.HasValue || !item.IsAssigned.Value)
+                {
+                    <form method="post" action="@Url.Action("AssignEmployee", "Admin")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@item.RequestID" />
+                        <label for="employeeId">Select Employee:</label>
+                        <select name="employeeId" required>
+                            <option value="">-- Select Employee --</option>
+                            @foreach (var employee in ViewBag.Employees)
+                            {
+                                <option value="@employee.EmployeeID">@employee.FullName</option>
+                            }
+                        </select>
+                        <input type="submit" value="Assign Employee" />
+                    </form>
+                }
+                else
+                {
+                    <span>Assigned</span>
+                }
+            </td>
+        </tr>
+    }
+</table>
